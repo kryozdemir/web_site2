@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yılan Oyunu</title>
+    <style>
+        canvas {
+            background-color: #eee;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Yılan Oyunu</h1>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const box = 20; // Birim boyutu
+
+        let snake = [ { x: 5 * box, y: 5 * box } ]; // Başlangıç pozisyonu
+        let food = { x: 7 * box, y: 7 * box }; // Yiyecek pozisyonu
+        let direction = "RIGHT"; // Başlangıç yönü
+        let score = 0; // Başlangıç skoru
+
+        function drawGame() {
+            // Alanı temizle
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Yılanı çiz
+            for (let i = 0; i < snake.length; i++) {
+                if (i === 0) {
+                    ctx.fillStyle = "green"; // Yılanın baş rengi
+                } else {
+                    ctx.fillStyle = "lightgreen"; // Yılanın gövde rengi
+                }
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+
+            // Yiyeceği çiz
+            ctx.fillStyle = "red";
+            ctx.fillRect(food.x, food.y, box, box);
+
+            // Yılanın yeni baş pozisyonunu hesapla
+            let head = { x: snake[0].x, y: snake[0].y };
+            if (direction === "LEFT") head.x -= box;
+            if (direction === "RIGHT") head.x += box;
+            if (direction === "UP") head.y -= box;
+            if (direction === "DOWN") head.y += box;
+
+            // Oyun sonu kontrolü
+            if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
+                alert("Oyun Bitti! Skorunuz: " + score);
+                resetGame();
+                return;
+            }
+
+            // Kendine çarpma kontrolü
+            for (let i = 0; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    alert("Oyun Bitti! Skorunuz: " + score);
+                    resetGame();
+                    return;
+                }
+            }
+
+            // Yiyecek kontrolü
+            if (head.x === food.x && head.y === food.y) {
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / box)) * box,
+                    y: Math.floor(Math.random() * (canvas.height / box)) * box
+                };
+                score++; // Skoru artır
+            } else {
+                snake.pop(); // Kuyruğu kaldır
+            }
+
+            snake.unshift(head); // Yeni baş ekle
+        }
+
+        function resetGame() {
+            snake = [ { x: 5 * box, y: 5 * box } ]; // Yılanı sıfırla
+            direction = "RIGHT"; // Yönü sıfırla
+            food = { x: 7 * box, y: 7 * box }; // Yiyeceği sıfırla
+            score = 0; // Skoru sıfırla
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowLeft" && direction !== "RIGHT") {
+                direction = "LEFT";
+            } else if (event.key === "ArrowUp" && direction !== "DOWN") {
+                direction = "UP";
+            } else if (event.key === "ArrowRight" && direction !== "LEFT") {
+                direction = "RIGHT";
+            } else if (event.key === "ArrowDown" && direction !== "UP") {
+                direction = "DOWN";
+            }
+        });
+
+        setInterval(drawGame, 100); // 200 ms aralıklarla oyunu çalıştır
+    </script>
+</body>
+</html>
